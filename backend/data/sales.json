@@ -1,0 +1,118 @@
+[
+  {
+    "items": [
+      {
+        "name": "Chapati",
+        "price": 20
+      },
+      {
+        "name": "Chapati",
+        "price": 20
+      }
+    ],
+    "total": 40,
+    "date": "2025-10-10T12:01:30.550Z"
+  },
+  {
+    "items": [
+      {
+        "name": "Rice & Beef Stew",
+        "price": 150
+      }
+    ],
+    "total": 150,
+    "date": "2025-10-10T12:02:00.687Z"
+  },
+  {
+    "items": [
+      {
+        "name": "Chapati",
+        "price": 20
+      },
+      {
+        "name": "Chapati",
+        "price": 20
+      },
+      {
+        "name": "Chapati",
+        "price": 20
+      },
+      {
+        "name": "Chapati",
+        "price": 20
+      }
+    ],
+    "total": 80,
+    "date": "2025-10-10T12:04:35.600Z"
+  },
+  {
+    "items": [
+      {
+        "name": "Pancake",
+        "price": 20
+      },
+      {
+        "name": "Pancake",
+        "price": 20
+      },
+      {
+        "name": "Pancake",
+        "price": 20
+      },
+      {
+        "name": "Pancake",
+        "price": 20
+      }
+    ],
+    "total": 80,
+    "date": "2025-10-10T12:10:58.082Z"
+  },
+  {
+    "items": [
+      {
+        "name": "Chapati",
+        "price": 20
+      }
+    ],
+    "total": 20,
+    "date": "2025-10-10T12:34:28.973Z"
+  },
+  {
+    "items": [
+      {
+        "name": "Chapati",
+        "price": 20
+      }
+    ],
+    "total": 20,
+    "date": "2025-10-10T12:35:20.622Z"
+  },
+  {
+    "items": [
+      {
+        "name": "Ugali & Sukuma Wiki",
+        "price": 80
+      }
+    ],
+    "total": 80,
+    "date": "2025-10-10T12:37:23.500Z"
+  },
+  {
+    "items": [
+      {
+        "name": "Chapati",
+        "price": 20
+      },
+      {
+        "name": "Chapati",
+        "price": 20
+      },
+      {
+        "name": "Chapati",
+        "price": 20
+      }
+    ],
+    "total": 60,
+    "date": "2025-10-10T12:40:51.106Z"
+  }
+]

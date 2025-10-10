@@ -1,0 +1,60 @@
+{
+  "products": [
+    {
+      "category": "Snacks",
+      "items": [
+        { "name": "Chapati", "price": 20 },
+        { "name": "Mandazi", "price": 10 },
+        { "name": "Pancake", "price": 20 },
+        { "name": "Egg Sandwich", "price": 70 },
+        { "name": "Beef Sandwich", "price": 100 },
+        { "name": "Bread Slices", "price": 20 },
+        { "name": "Plain Egg", "price": 40 },
+        { "name": "Omelet", "price": 50 },
+        { "name": "Scrambled Egg", "price": 50 },
+        { "name": "Cassava", "price": 50 },
+        { "name": "Rolex", "price": 70 },
+        { "name": "Boiled Egg", "price": 30 },
+        { "name": "Cinnamon Rolls", "price": 50 },
+        { "name": "Samosa", "price": 50 },
+        { "name": "Scones", "price": 20 }
+      ]
+    },
+    {
+      "category": "Main Meals",
+      "items": [
+        { "name": "Ugali & Sukuma Wiki", "price": 80 },
+        { "name": "Ugali & Beef Stew", "price": 150 },
+        { "name": "Rice & Beans", "price": 100 },
+        { "name": "Rice & Beef Stew", "price": 150 },
+        { "name": "Pilau", "price": 150 },
+        { "name": "Chapati & Ndengu", "price": 100 },
+        { "name": "Chapati & Beef Stew", "price": 150 },
+        { "name": "Matoke & Beef", "price": 130 },
+        { "name": "Fish with Ugali", "price": 200 },
+        { "name": "Chicken with Rice", "price": 250 }
+      ]
+    },
+    {
+      "category": "Beverages (Hot)",
+      "items": [
+        { "name": "Tea (Milk)", "price": 30 },
+        { "name": "Black Tea", "price": 20 },
+        { "name": "Coffee", "price": 40 },
+        { "name": "Hot Chocolate", "price": 60 },
+        { "name": "Lemon Tea", "price": 30 }
+      ]
+    },
+    {
+      "category": "Beverages (Cold)",
+      "items": [
+        { "name": "Soda (Coke/Fanta/Sprite)", "price": 60 },
+        { "name": "Water 500ml", "price": 40 },
+        { "name": "Water 1L", "price": 70 },
+        { "name": "Fresh Juice (Mango)", "price": 100 },
+        { "name": "Fresh Juice (Passion)", "price": 100 },
+        { "name": "Fresh Juice (Orange)", "price": 120 }
+      ]
+    }
+  ]
+}
