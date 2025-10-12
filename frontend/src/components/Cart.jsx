@@ -8,7 +8,7 @@ function Cart({ cart, setCart, fetchSales }) {
     if (cart.length === 0) return alert("Cart is empty!");
 
     try {
-      await axios.post("http://localhost:5000/sales", {
+      await axios.post("https://restaurant-pos-0ggo.onrender.com/sales", {
         items: cart,
         total,
       });
