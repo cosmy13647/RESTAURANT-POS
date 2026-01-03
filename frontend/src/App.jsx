@@ -3,12 +3,14 @@ import axios from "axios";
 import Menu from "./components/Menu";
 import Cart from "./components/Cart";
 import Sales from "./components/Sales";
+import Admin from "./components/Admin";
 
 function App() {
   const [products, setProducts] = useState([]);
   const [cart, setCart] = useState([]);
   const [sales, setSales] = useState([]);
   const [totalSales, setTotalSales] = useState(0);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   const fetchProducts = async () => {
     try {
@@ -38,6 +40,37 @@ function App() {
     }
   };
 
+  /* Smart Cart Logic */
+  const addToCart = (product) => {
+    setCart((prev) => {
+      const existing = prev.find((item) => item.name === product.name);
+      if (existing) {
+        return prev.map((item) =>
+          item.name === product.name
+            ? { ...item, quantity: (item.quantity || 1) + 1 }
+            : item
+        );
+      }
+      return [...prev, { ...product, quantity: 1 }];
+    });
+  };
+
+  const updateQuantity = (name, delta) => {
+    setCart((prev) =>
+      prev.map((item) => {
+        if (item.name === name) {
+          const newQty = Math.max(1, (item.quantity || 1) + delta);
+          return { ...item, quantity: newQty };
+        }
+        return item;
+      })
+    );
+  };
+
+  const removeFromCart = (name) => {
+    setCart((prev) => prev.filter((item) => item.name !== name));
+  };
+
   useEffect(() => {
     fetchProducts();
     fetchSales();
@@ -46,27 +79,61 @@ function App() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gray-100 text-gray-800">
-      <header className="bg-green-600 text-white text-center py-4 text-2xl font-bold shadow">
-        Restaurant POS
+    <div className="min-h-screen bg-slate-50 text-slate-800 font-sans">
+      <header className={`bg-gradient-to-r ${isAdmin ? 'from-slate-700 to-slate-800' : 'from-emerald-600 to-teal-600'} text-white py-5 shadow-lg relative z-10 transition-colors duration-500`}>
+        <div className="max-w-7xl mx-auto px-6 flex justify-between items-center">
+          <div>
+            <h1 className="text-3xl font-extrabold tracking-tight">Restaurant POS</h1>
+            <p className="text-emerald-100 text-sm mt-1 opacity-90">{isAdmin ? 'Admin Dashboard - Manage Menu' : 'Manage orders and sales efficiently'}</p>
+          </div>
+          <div className="flex items-center gap-6">
+            <button
+              onClick={() => setIsAdmin(!isAdmin)}
+              className={`px-4 py-2 rounded-full font-bold text-sm transition-all ${isAdmin ? 'bg-white text-slate-800' : 'bg-black/20 hover:bg-black/30'}`}
+            >
+              {isAdmin ? 'Exit Admin' : 'Admin Area'}
+            </button>
+            <div className="text-right">
+              <div className="text-emerald-100 text-xs font-medium uppercase tracking-wider">Status</div>
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span className="font-semibold">Online</span>
+              </div>
+            </div>
+          </div>
+        </div>
       </header>
 
-      <div className="flex gap-4 p-4 max-w-7xl mx-auto">
-        {/* Left: Menu */}
-        <div className="flex-1">
-          <Menu products={products} cart={cart} setCart={setCart} />
-        </div>
+      <main className="flex flex-col lg:flex-row gap-6 p-6 max-w-[1600px] mx-auto h-[calc(100vh-100px)]">
+        {isAdmin ? (
+          <section className="w-full h-full">
+            <Admin products={products} fetchProducts={fetchProducts} />
+          </section>
+        ) : (
+          <>
+            {/* Left: Menu - Grows to fill space */}
+            <section className="flex-1 min-w-0 h-full">
+              <Menu products={products} addToCart={addToCart} />
+            </section>
 
-        {/* Middle: Cart (pass fetchSales so Cart can refresh totals after checkout) */}
-        <div className="w-96">
-          <Cart cart={cart} setCart={setCart} fetchSales={fetchSales} />
-        </div>
+            {/* Middle: Cart - Fixed width */}
+            <section className="w-full lg:w-[400px] flex-shrink-0 h-full">
+              <Cart
+                cart={cart}
+                setCart={setCart}
+                fetchSales={fetchSales}
+                updateQuantity={updateQuantity}
+                removeFromCart={removeFromCart}
+              />
+            </section>
 
-        {/* Right: Sales summary */}
-        <div className="w-80">
-          <Sales sales={sales} total={totalSales} />
-        </div>
-      </div>
+            {/* Right: Sales summary - Fixed width */}
+            <section className="w-full lg:w-[320px] flex-shrink-0 h-full">
+              <Sales sales={sales} total={totalSales} />
+            </section>
+          </>
+        )}
+      </main>
     </div>
   );
 }

@@ -1,53 +1,103 @@
 import express from "express";
-import fs from "fs";
-import path from "path";
 import cors from "cors";
-import { fileURLToPath } from "url";
+import dotenv from "dotenv";
+import connectDB from "./db.js";
+import Product from "./models/Product.js";
+import Sale from "./models/Sale.js";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+dotenv.config();
 
 const app = express();
-const PORT = 5000;
+const PORT = process.env.PORT || 5000;
+
+// Connect to Database
+connectDB();
 
 app.use(cors());
 app.use(express.json());
 
-// File paths
-const productsFilePath = path.join(__dirname, "data", "products.json");
-const salesFilePath = path.join(__dirname, "data", "sales.json");
-
 // Load products
-app.get("/products", (req, res) => {
+app.get("/products", async (req, res) => {
   try {
-    const data = fs.readFileSync(productsFilePath, "utf8");
-    const products = JSON.parse(data);
-    res.json({ products });
-
+    const allProducts = await Product.find({});
+    res.json({ products: allProducts });
   } catch (error) {
     console.error("Error reading products:", error);
     res.status(500).json({ error: "Failed to load products" });
   }
 });
 
-// Record a sale
-app.post("/sales", (req, res) => {
+// --- ADMIN ROUTES ---
+
+// Create a new category
+app.post("/products/category", async (req, res) => {
   try {
-    const sale = req.body;
+    const { category } = req.body;
+    if (!category) return res.status(400).json({ error: "Category name required" });
 
-    // Load existing sales or create new file
-    let sales = [];
-    if (fs.existsSync(salesFilePath)) {
-      const data = fs.readFileSync(salesFilePath, "utf8");
-      sales = data ? JSON.parse(data) : [];
-    }
+    const newCategory = new Product({ category, items: [] });
+    await newCategory.save();
+    res.json(newCategory);
+  } catch (error) {
+    console.error("Error creating category:", error);
+    res.status(500).json({ error: "Failed to create category" });
+  }
+});
 
-    // Add new sale
-    sale.date = new Date().toISOString();
-    sales.push(sale);
+// Add item to category
+app.post("/products/item", async (req, res) => {
+  try {
+    const { categoryId, name, price } = req.body;
+    const category = await Product.findById(categoryId);
+    if (!category) return res.status(404).json({ error: "Category not found" });
 
-    // Save file
-    fs.writeFileSync(salesFilePath, JSON.stringify(sales, null, 2));
+    category.items.push({ name, price });
+    await category.save();
+    res.json(category);
+  } catch (error) {
+    console.error("Error adding item:", error);
+    res.status(500).json({ error: "Failed to add item" });
+  }
+});
+
+// Delete an item
+app.delete("/products/item", async (req, res) => {
+  try {
+    const { categoryId, itemId } = req.body;
+    const category = await Product.findById(categoryId);
+    if (!category) return res.status(404).json({ error: "Category not found" });
+
+    // Filter out the item
+    category.items = category.items.filter(item => item._id.toString() !== itemId);
+    await category.save();
+    res.json(category);
+  } catch (error) {
+    console.error("Error deleting item:", error);
+    res.status(500).json({ error: "Failed to delete item" });
+  }
+});
+
+// Delete a category
+app.delete("/products/category/:id", async (req, res) => {
+  try {
+    await Product.findByIdAndDelete(req.params.id);
+    res.json({ message: "Category deleted" });
+  } catch (error) {
+    console.error("Error deleting category:", error);
+    res.status(500).json({ error: "Failed to delete category" });
+  }
+});
+
+// --------------------
+
+// Record a sale
+app.post("/sales", async (req, res) => {
+  try {
+    const saleData = req.body;
+
+    // Create new sale in DB
+    const newSale = new Sale(saleData);
+    await newSale.save();
 
     res.json({ message: "Sale recorded successfully" });
   } catch (error) {
@@ -57,21 +107,28 @@ app.post("/sales", (req, res) => {
 });
 
 // Get today's total and sales list
-app.get("/sales", (req, res) => {
+app.get("/sales", async (req, res) => {
   try {
-    if (!fs.existsSync(salesFilePath)) {
-      return res.json({ totalSales: 0, sales: [] });
-    }
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
 
-    const data = fs.readFileSync(salesFilePath, "utf8");
-    const sales = data ? JSON.parse(data) : [];
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
 
-    const today = new Date().toISOString().slice(0, 10);
-    const todaySales = sales.filter(s => s.date?.startsWith(today));
+    // Find sales for today
+    const sales = await Sale.find({
+      date: {
+        $gte: today,
+        $lt: tomorrow
+      }
+    });
 
-    const totalSales = todaySales.reduce((sum, s) => sum + (s.total || 0), 0);
+    const totalSales = sales.reduce((sum, s) => sum + (s.total || 0), 0);
 
-    res.json({ totalSales, sales: todaySales });
+    // Format sales to match previous structure if needed, or send as is
+    // Previous structure: array of sale objects
+
+    res.json({ totalSales, sales });
   } catch (error) {
     console.error("Error reading sales:", error);
     res.status(500).json({ error: "Failed to read sales" });
