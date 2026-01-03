@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
+import API_URL from "../config";
 
 function Admin({ products, fetchProducts }) {
     const [newCatName, setNewCatName] = useState("");
@@ -8,7 +9,7 @@ function Admin({ products, fetchProducts }) {
     const createCategory = async () => {
         if (!newCatName) return alert("Enter category name");
         try {
-            await axios.post("http://localhost:5000/products/category", { category: newCatName });
+            await axios.post(`${API_URL}/products/category`, { category: newCatName });
             alert("✅ Category Created");
             setNewCatName("");
             fetchProducts();
@@ -21,7 +22,7 @@ function Admin({ products, fetchProducts }) {
     const addItem = async () => {
         if (!newItem.categoryId || !newItem.name || !newItem.price) return alert("Fill all fields");
         try {
-            await axios.post("http://localhost:5000/products/item", newItem);
+            await axios.post(`${API_URL}/products/item`, newItem);
             alert("✅ Item Added");
             setNewItem({ ...newItem, name: "", price: "" }); // keep category selected
             fetchProducts();
@@ -34,7 +35,7 @@ function Admin({ products, fetchProducts }) {
     const deleteCategory = async (id) => {
         if (!window.confirm("Delete this entire category?")) return;
         try {
-            await axios.delete(`http://localhost:5000/products/category/${id}`);
+            await axios.delete(`${API_URL}/products/category/${id}`);
             fetchProducts();
         } catch (err) {
             console.error(err);
@@ -45,7 +46,7 @@ function Admin({ products, fetchProducts }) {
     const deleteItem = async (categoryId, itemId) => {
         if (!window.confirm("Delete this item?")) return;
         try {
-            await axios.delete("http://localhost:5000/products/item", {
+            await axios.delete(`${API_URL}/products/item`, {
                 data: { categoryId, itemId }
             });
             fetchProducts();

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
+import API_URL from "../config";
 
 function Cart({ cart, setCart, fetchSales, updateQuantity, removeFromCart }) {
   const [paymentMethod, setPaymentMethod] = useState("Cash");
@@ -11,7 +12,7 @@ function Cart({ cart, setCart, fetchSales, updateQuantity, removeFromCart }) {
     if (cart.length === 0) return alert("Cart is empty!");
 
     try {
-      await axios.post("http://localhost:5000/sales", {
+      await axios.post(`${API_URL}/sales`, {
         items: cart,
         total,
         paymentMethod,

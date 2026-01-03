@@ -4,6 +4,7 @@ import Menu from "./components/Menu";
 import Cart from "./components/Cart";
 import Sales from "./components/Sales";
 import Admin from "./components/Admin";
+import API_URL from "./config";
 
 function App() {
   const [products, setProducts] = useState([]);
@@ -14,7 +15,7 @@ function App() {
 
   const fetchProducts = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/products");
+      const res = await axios.get(`${API_URL}/products`);
       // support either { products: [...] } or [] shapes
       const p = res.data.products ?? res.data;
       setProducts(Array.isArray(p) ? p : []);
@@ -25,7 +26,7 @@ function App() {
 
   const fetchSales = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/sales");
+      const res = await axios.get(`${API_URL}/sales`);
       const data = res.data ?? {};
       const s = data.sales ?? (Array.isArray(data) ? data : []);
       const t =
