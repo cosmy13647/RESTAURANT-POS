@@ -2,44 +2,48 @@ import React, { useState } from "react";
 import axios from "axios";
 import API_URL from "../config";
 
-function Admin({ products, fetchProducts }) {
+function Admin({ products, fetchProducts, token }) {
     const [newCatName, setNewCatName] = useState("");
     const [newItem, setNewItem] = useState({ categoryId: "", name: "", price: "" });
+
+    const authHeader = {
+        headers: { Authorization: `Bearer ${token}` }
+    };
 
     const createCategory = async () => {
         if (!newCatName) return alert("Enter category name");
         try {
-            await axios.post(`${API_URL}/products/category`, { category: newCatName });
+            await axios.post(`${API_URL}/products/category`, { category: newCatName }, authHeader);
             alert("✅ Category Created");
             setNewCatName("");
             fetchProducts();
         } catch (err) {
             console.error(err);
-            alert("Error creating category");
+            alert("Error creating category: " + (err.response?.data?.error || "Unknown error"));
         }
     };
 
     const addItem = async () => {
         if (!newItem.categoryId || !newItem.name || !newItem.price) return alert("Fill all fields");
         try {
-            await axios.post(`${API_URL}/products/item`, newItem);
+            await axios.post(`${API_URL}/products/item`, newItem, authHeader);
             alert("✅ Item Added");
             setNewItem({ ...newItem, name: "", price: "" }); // keep category selected
             fetchProducts();
         } catch (err) {
             console.error(err);
-            alert("Error adding item");
+            alert("Error adding item: " + (err.response?.data?.error || "Unknown error"));
         }
     };
 
     const deleteCategory = async (id) => {
         if (!window.confirm("Delete this entire category?")) return;
         try {
-            await axios.delete(`${API_URL}/products/category/${id}`);
+            await axios.delete(`${API_URL}/products/category/${id}`, authHeader);
             fetchProducts();
         } catch (err) {
             console.error(err);
-            alert("Error deleting category");
+            alert("Error deleting category: " + (err.response?.data?.error || "Unknown error"));
         }
     };
 
@@ -47,12 +51,13 @@ function Admin({ products, fetchProducts }) {
         if (!window.confirm("Delete this item?")) return;
         try {
             await axios.delete(`${API_URL}/products/item`, {
+                ...authHeader,
                 data: { categoryId, itemId }
             });
             fetchProducts();
         } catch (err) {
             console.error(err);
-            alert("Error deleting item");
+            alert("Error deleting item: " + (err.response?.data?.error || "Unknown error"));
         }
     };
 

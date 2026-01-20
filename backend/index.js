@@ -4,6 +4,8 @@ import dotenv from "dotenv";
 import connectDB from "./db.js";
 import Product from "./models/Product.js";
 import Sale from "./models/Sale.js";
+import User from "./models/User.js";
+import jwt from "jsonwebtoken";
 
 dotenv.config();
 
@@ -16,6 +18,63 @@ connectDB();
 app.use(cors());
 app.use(express.json());
 
+// --- AUTH MIDDLEWARE ---
+const authenticateToken = (req, res, next) => {
+  const authHeader = req.headers["authorization"];
+  const token = authHeader && authHeader.split(" ")[1];
+
+  if (!token) return res.status(401).json({ error: "Access denied. No token provided." });
+
+  try {
+    const verified = jwt.verify(token, process.env.JWT_SECRET || "fallback_secret");
+    req.user = verified;
+    next();
+  } catch (err) {
+    res.status(403).json({ error: "Invalid token." });
+  }
+};
+
+// --- AUTH ROUTES ---
+
+// Login route
+app.post("/api/auth/login", async (req, res) => {
+  try {
+    const { username, password } = req.body;
+    const user = await User.findOne({ username });
+    if (!user) return res.status(400).json({ error: "Invalid username or password" });
+
+    const validPassword = await user.comparePassword(password);
+    if (!validPassword) return res.status(400).json({ error: "Invalid username or password" });
+
+    const token = jwt.sign(
+      { id: user._id, username: user.username, role: user.role },
+      process.env.JWT_SECRET || "fallback_secret",
+      { expiresIn: "8h" }
+    );
+
+    res.json({ token, user: { username: user.username, role: user.role } });
+  } catch (error) {
+    console.error("Login error:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// Initial Register route (should be protected or removed after first user)
+app.post("/api/auth/register-initial", async (req, res) => {
+  try {
+    const { username, password } = req.body;
+    const userCount = await User.countDocuments();
+    if (userCount > 0) return res.status(403).json({ error: "Registration disabled after first user." });
+
+    const newUser = new User({ username, password });
+    await newUser.save();
+    res.json({ message: "Initial admin user created successfully" });
+  } catch (error) {
+    console.error("Registration error:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 // Load products
 app.get("/products", async (req, res) => {
   try {
@@ -27,10 +86,10 @@ app.get("/products", async (req, res) => {
   }
 });
 
-// --- ADMIN ROUTES ---
+// --- ADMIN ROUTES --- (Protected)
 
 // Create a new category
-app.post("/products/category", async (req, res) => {
+app.post("/products/category", authenticateToken, async (req, res) => {
   try {
     const { category } = req.body;
     if (!category) return res.status(400).json({ error: "Category name required" });
@@ -45,7 +104,7 @@ app.post("/products/category", async (req, res) => {
 });
 
 // Add item to category
-app.post("/products/item", async (req, res) => {
+app.post("/products/item", authenticateToken, async (req, res) => {
   try {
     const { categoryId, name, price } = req.body;
     const category = await Product.findById(categoryId);
@@ -61,7 +120,7 @@ app.post("/products/item", async (req, res) => {
 });
 
 // Delete an item
-app.delete("/products/item", async (req, res) => {
+app.delete("/products/item", authenticateToken, async (req, res) => {
   try {
     const { categoryId, itemId } = req.body;
     const category = await Product.findById(categoryId);
@@ -78,7 +137,7 @@ app.delete("/products/item", async (req, res) => {
 });
 
 // Delete a category
-app.delete("/products/category/:id", async (req, res) => {
+app.delete("/products/category/:id", authenticateToken, async (req, res) => {
   try {
     await Product.findByIdAndDelete(req.params.id);
     res.json({ message: "Category deleted" });
